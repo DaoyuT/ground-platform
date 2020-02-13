@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef, OnInit } from '@angular/core';
+import { environment } from '../environments/environment';
+
 
 @Component({
   selector: 'ground-map',
@@ -26,7 +28,19 @@ export class MapComponent implements AfterViewInit {
   @ViewChild('map', { static: false }) mapElement!: ElementRef;
 
   ngAfterViewInit() {
-    this.initializeMap();
+    const googleMapsUrl = `http://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}`;
+    console.log(environment.googleMapsApiKey);
+    // this.initializeMap();
+    if (!document.querySelectorAll(`[src="${googleMapsUrl}"]`).length) { 
+      document.body.appendChild(Object.assign(
+        document.createElement('script'), {
+          type: 'text/javascript',
+          src: googleMapsUrl,
+          onload: () => this.initializeMap()
+        }));
+    } else {
+      this.initializeMap();
+    }
   }
 
   initializeMap() {
