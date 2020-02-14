@@ -14,15 +14,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<agm-map
-  [zoom]="zoom"
-  [streetViewControl]="false"
-  [mapTypeId]="'hybrid'">
-  <div *ngFor="let feature of (features$ | async)">
-    <agm-marker [latitude]="feature.location.latitude"
-                [longitude]="feature.location.longitude"
-                (markerClick)="onFeatureClick(feature.id)"
-                [iconUrl]="feature.id == focusedFeatureId ? enlargedIcon : icon"
-                ></agm-marker>
-  </div>
-</agm-map>
+<div #map id="map"></div>
