@@ -76,13 +76,14 @@ export class DataStoreService {
 
   // TODO: Define return types for methods in this class
   updateLayer(projectId: string, layer: Layer) {
-    const { id: layerId, forms, ...layerDoc } = layer;
+    const { id: layerId, name, forms, ...layerDoc } = layer;
 
     return this.db
       .collection('projects')
       .doc(projectId)
       .update({
         [`layers.${layerId}`]: {
+          name:  name?.toJS() || {},
           forms: forms?.toJS() || {},
           ...layerDoc,
         },
@@ -350,7 +351,13 @@ export class DataStoreService {
    * </code></pre>
    */
   private static toAuditInfo(data: DocumentData): AuditInfo {
-    return new AuditInfo(data.user, data.clientTimestamp);
+    console.log(data.serverTimestamp);
+    console.log(data.serverTimestamp?.toDate());
+    return new AuditInfo(
+      data.user,
+      data.clientTimestamp?.toDate(),
+      data.serverTimestamp?.toDate()
+    );
   }
 
   generateId() {
