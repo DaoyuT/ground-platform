@@ -49,12 +49,21 @@ const normalPolygonStrokeWeight = 3;
 const enlargedPolygonStrokeWeight = 6;
 const zoomedInLevel = 13;
 
+export interface MyMarker extends google.maps.Marker {
+  uuid: string;
+}
+
+export function MyMarkerFactory(uuid: string, marker: google.maps.Marker): google.maps.Marker & {uuid:string} {  
+  return Object.assign(marker, {uuid});
+}
+
 @Component({
   selector: 'ground-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss'],
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
+
   private subscription: Subscription = new Subscription();
   features$: Observable<List<Feature>>;
   activeProject$: Observable<Project>;
@@ -66,8 +75,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     streetViewControl: false,
     mapTypeId: google.maps.MapTypeId.HYBRID,
   };
-  private selectedMarker?: google.maps.Marker;
-  private markers: google.maps.Marker[] = [];
+  private selectedMarker?: MyMarker;
+  private markers: MyMarker[] = [];
   private crosshairCursorMapOptions: google.maps.MapOptions = {
     draggableCursor: 'crosshair',
   };
@@ -79,7 +88,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   newFeatureToReposition?: LocationFeature;
   oldLatLng?: google.maps.LatLng;
   newLatLng?: google.maps.LatLng;
-  markerToReposition?: google.maps.Marker;
+  markerToReposition?: MyMarker;
   disableMapClicks = false;
 
   @ViewChild(GoogleMap) map!: GoogleMap;
@@ -247,7 +256,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       draggable: false,
       title: feature.id,
     };
-    const marker = new google.maps.Marker(options);
+    const marker = MyMarkerFactory(feature.id, new google.maps.Marker(options));
+    console.log(marker.uuid);
     marker.addListener('click', () => this.onMarkerClick(feature.id));
     marker.addListener('dragstart', (event: google.maps.MouseEvent) =>
       this.onMarkerDragStart(event, marker)
@@ -267,7 +277,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   private onMarkerDragStart(
     event: google.maps.MouseEvent,
-    marker: google.maps.Marker
+    marker: MyMarker
   ) {
     // TODO: Show confirm dialog and disable other components when entering reposition state.
     // Currently we are figuring out how should the UI trigger this state.
@@ -323,7 +333,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         : this.defaultCursorMapOptions;
   }
 
-  private selectMarker(marker: google.maps.Marker | undefined) {
+  private selectMarker(marker: MyMarker | undefined) {
     if (marker === this.selectedMarker) {
       return;
     }
@@ -346,7 +356,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.selectMarker(markerToSelect);
   }
 
-  private setIconSize(marker: google.maps.Marker, size: number) {
+  private setIconSize(marker: MyMarker, size: number) {
     const icon = marker.getIcon() as google.maps.ReadonlyIcon;
     const newIcon = {
       url: icon.url,
